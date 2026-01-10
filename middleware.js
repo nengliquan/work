@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
-// 允许通过的关键词 (Cloudflare 传来的 Region 或 City 包含这些即视为“IP在北京”)
-const envRegions = process.env.ALLOWED_REGIONS；
-// 将字符串 "Beijing,Shanghai,Jinrongjie" 转换成数组 ['Beijing', 'Shanghai', 'Jinrongjie']
+  // 允许通过的关键词 (Cloudflare 传来的 Region 或 City 包含这些即视为“IP在北京”)
+  const envRegions = process.env.ALLOWED_REGIONS；
+  // 将字符串 "Beijing,Shanghai,Jinrongjie" 转换成数组 ['Beijing', 'Shanghai', 'Jinrongjie']
   // 并去除可能多余的空格
   const ALLOWED_TARGETS = envRegions.split(',').map(item => item.trim());
 
