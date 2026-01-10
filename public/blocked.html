@@ -16,6 +16,19 @@
         <h2>访问被拒绝</h2>
         <p>GPS 定位结果显示您当前不在北京地区。</p>
         <p style="font-size: 12px; color: #999; margin-top: 20px;">Error: GEO_PHYSICAL_CHECK_FAILED</p>
+        <p id="geo-debug" style="font-size: 12px; color: #999; margin-top: 5px;"></p>
     </div>
+
+    <script>
+        // 读取 Cookie 中的位置信息并显示
+        const getCookie = (name) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+        };
+        const geo = getCookie('detected_geo');
+        console.log('[Client Debug] detected_geo cookie:', geo);
+        if (geo) document.getElementById('geo-debug').innerText = `Detected: ${geo}`;
+    </script>
 </body>
 </html>

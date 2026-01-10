@@ -28,6 +28,7 @@ export function middleware(request) {
   const city = headers.get('x-user-city') || 'Unknown';
   const region = headers.get('x-user-region') || 'Unknown';
   
+  console.log(`[Middleware Debug] Raw Headers -> x-user-city: ${headers.get('x-user-city')}, x-user-region: ${headers.get('x-user-region')}`);
   console.log(`[Geo] Detect: ${region} - ${city} | Allowed: ${ALLOWED_TARGETS}`);
 
   // 4. 判断 IP 是否在允许列表中
@@ -39,18 +40,27 @@ export function middleware(request) {
 
   const url = request.nextUrl.clone();
 
+  let response;
+
   if (isIpAllowed) {
-    // ✅ IP 符合要求 -> 去 router.html 检查设备类型
-    url.pathname = '/router.html';
-    return NextResponse.rewrite(url);
+    console.log(`[Middleware Debug] Access GRANTED. Redirecting to /success.html`);
+    // ✅ IP 符合要求 -> 去 success.html
+    url.pathname = '/success.html';
+    response = NextResponse.rewrite(url);
   } else {
-    // ❌ IP 不符合要求 -> 拦截去 GPS 验证
-    url.pathname = '/verify.html';
+    console.log(`[Middleware Debug] Access DENIED. Redirecting to /blocked.html`);
+    // ❌ IP 不符合要求 -> 拦截去 blocked.html
+    url.pathname = '/blocked.html';
     url.searchParams.set('reason', 'ip_error');
     // 把当前识别到的错误地点传过去
     url.searchParams.set('detected', `${region} ${city}`);
-    return NextResponse.rewrite(url);
+    response = NextResponse.rewrite(url);
   }
+
+  // 将位置信息写入 Cookie，供前端页面读取显示 (设置 httpOnly: false 允许 JS 读取)
+  response.cookies.set('detected_geo', `${region} - ${city}`, { path: '/', httpOnly: false });
+  
+  return response;
 }
 
 // 拦截规则
