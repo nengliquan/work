@@ -1,39 +1,46 @@
 import { NextResponse } from 'next/server';
 
   // 允许通过的关键词 (Cloudflare 传来的 Region 或 City 包含这些即视为“IP在北京”)
-  const envRegions = process.env.ALLOWED_REGIONS;
+  const envRegions = process.env.ALLOWED_REGIONS || '';
   // 将字符串 "Beijing,Shanghai,Jinrongjie" 转换成数组 ['Beijing', 'Shanghai', 'Jinrongjie']
   // 并去除可能多余的空格
-  const ALLOWED_TARGETS = envRegions.split(',').map(item => item.trim());
+  const ALLOWED_TARGETS = envRegions.split(',').map(item => item.trim()).filter(Boolean);
 
 export function middleware(request) {
-  const { headers, cookies } = request;
+  const { headers } = request;
 
   // 2. 获取位置信息 (优先读取 Cloudflare 规则传递的 Header)
   // 如果你在本地测试没有 CF，默认是 Unknown
   const city = headers.get('x-user-city') || 'Unknown';
   const region = headers.get('x-user-region') || 'Unknown';
   
+  console.log(`[Middleware] Checking IP: Region=${region}, City=${city}`);
+
   // 3. 判断 IP 是否在北京
   const isIpInBeijing = ALLOWED_TARGETS.some(target => {
     return region.includes(target) || city.includes(target);
   });
 
+  // 4. 决定跳转逻辑
   const url = request.nextUrl.clone();
+  url.pathname = '/verification.html';
+  
+  // 将环境变量中的经纬度配置传递给前端页面 (默认值保持为北京范围)
+  url.searchParams.set('lat_min', process.env.GEO_LAT_MIN || '39.3');
+  url.searchParams.set('lat_max', process.env.GEO_LAT_MAX || '41.7');
+  url.searchParams.set('lon_min', process.env.GEO_LON_MIN || '115.3');
+  url.searchParams.set('lon_max', process.env.GEO_LON_MAX || '117.6');
 
-  if (isIpInBeijing) {
-    // ✅ 情况A：IP 显示在北京
-    // 策略：不要直接去 success，而是去 router.html
-    // 原因：我们要区分“电脑”还是“手机4G”，防止手机4G漂移
-    url.pathname = '/router.html';
-    return NextResponse.rewrite(url);
+  if (!isIpInBeijing) {
+    console.log('[Middleware] IP NOT in allowed region.');
+    // ❌ 情况B：IP 不在北京 -> 重定向到验证页，并附带错误原因
+    url.searchParams.set('tag', "网络位置: " + (region === 'Unknown' ? '未知' : region));
+    url.searchParams.set('msg', "您的网络 IP 显示不在北京区域（可能是基站信号漂移）。请授权 GPS 确认您在北京。");
+    return NextResponse.redirect(url);
   } else {
-    // ❌ 情况B：IP 不在北京 (可能是外地，也可能是漂移严重的4G)
-    // 策略：直接拦截，送去 GPS 强制验证
-    url.pathname = '/verify.html';
-    url.searchParams.set('reason', 'ip_error');
-    url.searchParams.set('detected', `${region} ${city}`);
-    return NextResponse.rewrite(url);
+    console.log('[Middleware] IP in allowed region. Enforcing strict check.');
+    // ✅ 情况A：IP 在北京 -> 重定向到验证页 (使用页面默认的“精确核验”文案)
+    return NextResponse.redirect(url);
   }
 }
 
@@ -41,6 +48,6 @@ export function middleware(request) {
 export const config = {
   matcher: [
     '/', 
-    '/((?!api|_next/static|_next/image|favicon.ico|success.html|verify.html|blocked.html|.*\\.(?:html|jpg|png|gif|svg|css|js)).*)'
+    '/((?!api|_next/static|_next/image|favicon.ico|success.html|verification.html|blocked.html|.*\\.(?:html|jpg|png|gif|svg|css|js)).*)'
   ],
 };
