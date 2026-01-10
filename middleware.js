@@ -1,72 +1,62 @@
 import { NextResponse } from 'next/server';
 
-// 允许访问的城市关键词
-// 优先从环境变量获取，多个城市用逗号分隔，例如 "Beijing,Shanghai"
-// 注意：如果启用高德 API，这里建议使用中文，例如 "北京"
-const ALLOWED_REGIONS = (process.env.ALLOWED_REGIONS || 'Beijing').split(',').map(r => r.trim());
+export function middleware(request) {
+  const { headers, cookies } = request;
 
-// 高德地图 API Key (需要在 Vercel 环境变量中配置 AMAP_KEY)
-const AMAP_KEY = process.env.AMAP_KEY;
+  // 1. 【配置读取】从环境变量获取允许的区域
+  // 如果后台没配置，默认给个 'Beijing' 防止报错
+  const envRegions = process.env.ALLOWED_REGIONS;
+  
+  // 将字符串 "Beijing,Shanghai,Jinrongjie" 转换成数组 ['Beijing', 'Shanghai', 'Jinrongjie']
+  // 并去除可能多余的空格
+  const ALLOWED_TARGETS = envRegions.split(',').map(item => item.trim());
 
-export async function middleware(request) {
-  let city = 'Unknown';
-  let region = 'Unknown';
+  // -------------------------------------------------------------
 
-  // 1. 尝试使用高德 API 获取位置 (如果配置了 Key)
-  if (AMAP_KEY) {
-    try {
-      // 获取用户 IP (x-forwarded-for 可能包含多个 IP，取第一个)
-      let ip = request.ip || request.headers.get('x-forwarded-for') || '';
-      if (ip.includes(',')) ip = ip.split(',')[0].trim();
-
-      if (ip) {
-        const res = await fetch(`https://restapi.amap.com/v3/ip?ip=${ip}&key=${AMAP_KEY}`);
-        const data = await res.json();
-
-        // status '1' 表示成功
-        if (data.status === '1') {
-          // 高德返回的是中文，例如 province: "北京市", city: "北京市"
-          region = data.province || 'Unknown';
-          // 直辖市的 city 字段可能为空，用 province 兜底
-          city = (data.city && typeof data.city === 'string' && data.city.length > 0) ? data.city : region;
-          console.log(`Amap Location: ${city}, ${region} (IP: ${ip})`);
-        }
+  // 2. 【特权通道】如果有 GPS 通行证 (Cookie)，直接放行
+  if (cookies.get('gps_pass')?.value === '1') {
+      const url = request.nextUrl.clone();
+      // 防止循环重定向
+      if (['/', '/router.html', '/verify.html'].includes(url.pathname)) {
+          url.pathname = '/success.html';
+          return NextResponse.rewrite(url);
       }
-    } catch (error) {
-      console.error('Amap API Error:', error);
-    }
+      return NextResponse.next();
   }
 
-  // 2. 如果高德未配置或获取失败，回退到 Vercel 原生 Geo
-  if (city === 'Unknown') {
-    const geo = request.geo || {};
-    city = geo.city || request.headers.get('x-vercel-ip-city') || 'Unknown';
-    region = geo.region || request.headers.get('x-vercel-ip-country-region') || 'Unknown';
-    console.log(`Vercel Location: ${city}, ${region}`);
-  }
+  // 3. 获取 Cloudflare 传来的位置信息
+  const city = headers.get('x-user-city') || 'Unknown';
+  const region = headers.get('x-user-region') || 'Unknown';
+  
+  console.log(`[Geo] Detect: ${region} - ${city} | Allowed: ${ALLOWED_TARGETS}`);
 
-  // 判断逻辑
-  const isAuthorized = ALLOWED_REGIONS.some(loc => 
-    (city && city.includes(loc)) || (region && region.includes(loc))
-  );
+  // 4. 判断 IP 是否在允许列表中
+  const isIpAllowed = ALLOWED_TARGETS.some(target => {
+    // 忽略大小写比对 (防止 beijing != Beijing)
+    return region.toLowerCase().includes(target.toLowerCase()) || 
+           city.toLowerCase().includes(target.toLowerCase());
+  });
 
   const url = request.nextUrl.clone();
 
-  if (isAuthorized) {
-    // 验证通过：指向 public/success.html
-    url.pathname = '/success.html';
+  if (isIpAllowed) {
+    // ✅ IP 符合要求 -> 去 router.html 检查设备类型
+    url.pathname = '/router.html';
     return NextResponse.rewrite(url);
   } else {
-    // 验证失败：指向 public/blocked.html
-    url.pathname = '/blocked.html';
+    // ❌ IP 不符合要求 -> 拦截去 GPS 验证
+    url.pathname = '/verify.html';
+    url.searchParams.set('reason', 'ip_error');
+    // 把当前识别到的错误地点传过去
+    url.searchParams.set('detected', `${region} ${city}`);
     return NextResponse.rewrite(url);
   }
 }
 
-// 拦截配置：拦截根路径，排除静态资源文件
+// 拦截规则
 export const config = {
   matcher: [
     '/', 
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:html|jpg|png|gif|svg|css|js)).*)'
+    '/((?!api|_next/static|_next/image|favicon.ico|success.html|verify.html|blocked.html|.*\\.(?:html|jpg|png|gif|svg|css|js)).*)'
   ],
 };

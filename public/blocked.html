@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>访问受限</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #fff1f0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .box { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); width: 85%; max-width: 340px; text-align: center; }
-        h2 { color: #ff4d4f; margin: 0 0 10px 0; }
+        body { font-family: -apple-system, sans-serif; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; color: #333; }
+        h2 { color: #ff4d4f; }
+        p { color: #666; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>🚫 非授权区域</h2>
-        <p style="color: #666;">系统检测到您当前不在北京地区。</p>
-        <p style="color: #999; font-size: 12px; margin-top: 20px;">Error: GEO_RESTRICTED_ZONE</p>
+    <div style="padding: 20px;">
+        <h2 style="font-size: 50px; margin: 0;">🚫</h2>
+        <h2>访问被拒绝</h2>
+        <p>GPS 定位结果显示您当前不在北京地区。</p>
+        <p style="font-size: 12px; color: #999; margin-top: 20px;">Error: GEO_PHYSICAL_CHECK_FAILED</p>
     </div>
 </body>
 </html>

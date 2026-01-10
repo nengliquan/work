@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>项目安全验证中心</title>
+    <title>项目交付与售后支持</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f4f4f7; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        body { font-family: -apple-system, sans-serif; background: #f4f4f7; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
         .box { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); width: 85%; max-width: 340px; text-align: center; }
-        img { width: 100%; border-radius: 8px; margin-top: 15px; }
-        h2 { color: #07c160; margin: 0 0 10px 0; }
+        h2 { color: #07c160; margin: 0 0 10px 0; font-size: 20px; }
+        p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        img { width: 100%; border-radius: 8px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
     <div class="box">
         <h2>✅ 身份验证通过</h2>
-        <p style="color: #666; font-size: 14px;">已确认您的地理位置：北京</p>
-        <p style="color: #999; font-size: 12px;">(基于 Vercel Edge Network)</p>
-        <img src="data:image/png;base64,这里替换成你的图片Base64编码">
+        <p>您已通过北京地区安全验证</p>
+        
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" alt="二维码">
+        
+        <div style="margin-top:15px; font-size:12px; color:#ccc;">Vercel Geo-Guard System</div>
     </div>
 </body>
 </html>

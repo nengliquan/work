@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>位置验证</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f5f5f7; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; text-align: center; }
+        .card { background: white; padding: 30px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; max-width: 320px; }
+        h3 { margin: 0 0 10px 0; color: #1d1d1f; }
+        p { color: #86868b; font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+        .btn { background: #0071e3; color: white; border: none; padding: 12px 0; border-radius: 25px; font-size: 16px; font-weight: 500; cursor: pointer; width: 100%; display: block; }
+        .btn:active { opacity: 0.8; }
+        .tag { font-size: 12px; padding: 4px 8px; border-radius: 4px; background: #fff1f0; color: #ff4d4f; display: inline-block; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h3>需二次确认位置</h3>
+    
+    <div id="error-tag" class="tag" style="display:none;"></div>
+
+    <p id="msg-content">为了保障项目交付安全，系统检测到您的网络环境需要进行精确位置核验。</p>
+
+    <button class="btn" onclick="startGPS()">📍 验证我的位置</button>
+    <div id="log" style="margin-top:15px; font-size:12px; color:#999;"></div>
+</div>
+
+<script>
+    // 1. 根据被拦截的原因，修改提示语
+    const params = new URLSearchParams(window.location.search);
+    const reason = params.get('reason');
+    const detected = params.get('detected');
+
+    const errorTag = document.getElementById('error-tag');
+    const msgContent = document.getElementById('msg-content');
+
+    if (reason === 'ip_error') {
+        // IP 完全不在北京
+        errorTag.innerText = "网络位置: " + (detected || "非北京");
+        errorTag.style.display = "inline-block";
+        msgContent.innerText = "您的网络 IP 显示不在北京区域（可能是基站信号漂移）。请授权 GPS 确认您在北京。";
+    } else if (reason === 'cellular') {
+        // 安卓 4G 用户
+        errorTag.innerText = "检测到移动数据网络";
+        errorTag.style.display = "inline-block";
+        msgContent.innerHTML = "您正在使用 <b>4G/5G 网络</b>，基站信号极易发生跨省漂移。请授权 GPS 以精确确认位置。";
+    }
+
+    // 2. GPS 验证逻辑
+    function startGPS() {
+        const log = document.getElementById('log');
+        log.innerText = "正在获取卫星信号...";
+
+        if (!navigator.geolocation) {
+            alert("浏览器不支持定位");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                log.innerText = `坐标获取成功: ${lat.toFixed(2)}, ${lon.toFixed(2)}`;
+
+                // 北京矩形范围校验 (稍微放宽一点边缘)
+                // 纬度 39.3 - 41.7, 经度 115.3 - 117.6
+                if (lat > 39.3 && lat < 41.7 && lon > 115.3 && lon < 117.6) {
+                    log.innerText = "验证通过！跳转中...";
+                    // 写入 Cookie 通行证 (有效期1小时)
+                    document.cookie = "gps_pass=1; path=/; max-age=3600";
+                    // 跳转成功页
+                    window.location.href = "/success.html";
+                } else {
+                    // 真的不在北京
+                    window.location.href = "/blocked.html";
+                }
+            },
+            (err) => {
+                console.error(err);
+                if (err.code === 1) alert("请点击“允许”以授予位置权限");
+                else alert("定位超时，请确保 GPS 已打开并重试");
+                log.innerText = "定位失败，请重试";
+            },
+            { enableHighAccuracy: true, timeout: 8000 }
+        );
+    }
+</script>
+</body>
+</html>
