@@ -29,6 +29,8 @@
     const params = new URLSearchParams(window.location.search);
     const tag = params.get('tag');
     const msg = params.get('msg');
+    const city = params.get('city') || 'Unknown';
+    const region = params.get('region') || 'Unknown';
     
     // 获取经纬度范围配置
     const latMin = parseFloat(params.get('lat_min')) || 39.3;
@@ -49,12 +51,16 @@
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
                 log.innerText = "坐标获取成功: " + lat.toFixed(2) + ", " + lon.toFixed(2);
+                
+                // 构建携带信息的查询参数
+                const queryParams = `?city=${encodeURIComponent(city)}&region=${encodeURIComponent(region)}&lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}`;
+
                 if (lat > latMin && lat < latMax && lon > lonMin && lon < lonMax) {
                     log.innerText = "验证通过！跳转中...";
                     document.cookie = "gps_pass=1; path=/; max-age=3600";
-                    window.location.href = "/success.html";
+                    window.location.href = "/success.html" + queryParams;
                 } else {
-                    window.location.href = "/blocked.html";
+                    window.location.href = "/blocked.html" + queryParams;
                 }
             },
             (err) => {

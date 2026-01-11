@@ -31,6 +31,10 @@ export function middleware(request) {
   url.searchParams.set('lon_min', process.env.GEO_LON_MIN || '115.3');
   url.searchParams.set('lon_max', process.env.GEO_LON_MAX || '117.6');
 
+  // 传递 IP 位置信息供后续页面显示
+  url.searchParams.set('city', city);
+  url.searchParams.set('region', region);
+
   if (!isIpInBeijing) {
     console.log('[Middleware] IP NOT in allowed region.');
     // ❌ 情况B：IP 不在北京 -> 重定向到验证页，并附带错误原因
