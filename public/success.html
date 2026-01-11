@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>项目交付与售后支持</title>
+    <script>
+        if (!sessionStorage.getItem('Tc_auth')) {
+            window.location.href = '/';
+        } else {
+            sessionStorage.removeItem('Tc_auth');
+        }
+    </script>
     <style>
         body { font-family: -apple-system, sans-serif; background: #f4f4f7; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
         .box { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); width: 85%; max-width: 340px; text-align: center; }

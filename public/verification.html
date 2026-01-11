@@ -58,8 +58,10 @@
                 if (lat > latMin && lat < latMax && lon > lonMin && lon < lonMax) {
                     log.innerText = "验证通过！跳转中...";
                     document.cookie = "gps_pass=1; path=/; max-age=3600";
+                    sessionStorage.setItem('Tc_auth', '1');
                     window.location.href = "/success.html" + queryParams;
                 } else {
+                    sessionStorage.setItem('Tc_auth', '1');
                     window.location.href = "/blocked.html" + queryParams;
                 }
             },
