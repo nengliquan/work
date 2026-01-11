@@ -26,6 +26,12 @@
         
         <img src="/code.png" alt="二维码">
         
+        <p style="font-size: 12px; color: #999; margin: 10px 0;">(如果无法截屏，请长按图片保存)</p>
+        <div style="background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 5px;">
+            <span style="color: #333;">微信号：<strong id="wx-id" style="user-select: all;">zhibilaoshi</strong></span>
+            <a href="javascript:;" onclick="copyWx()" style="color: #0071e3; margin-left: 10px; text-decoration: none; font-weight: bold; font-size: 14px;">复制</a>
+        </div>
+        
         <div style="margin-top:15px; font-size:12px; color:#ccc;">Secure Document Gateway</div>
         <div id="info" style="margin-top:10px; font-size:12px; color:#999; text-align: left; background: #f9f9f9; padding: 10px; border-radius: 6px;"></div>
     </div>
@@ -37,6 +43,15 @@
             <div>GPS Lat: ${params.get('lat')}</div>
             <div>GPS Lon: ${params.get('lon')}</div>
         `;
+
+        function copyWx() {
+            const text = document.getElementById('wx-id').innerText;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => alert('微信号已复制')).catch(() => prompt('请手动复制', text));
+            } else {
+                prompt('请手动复制', text);
+            }
+        }
     </script>
 </body>
 </html>
