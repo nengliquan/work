@@ -38,8 +38,8 @@ export function middleware(request) {
   if (!isIpInBeijing) {
     console.log('[Middleware] IP NOT in allowed region.');
     // ❌ 情况B：IP 不在北京 -> 重定向到验证页，并附带错误原因
-    url.searchParams.set('tag', "网络位置: " + (region === 'Unknown' ? '未知' : region));
-    url.searchParams.set('msg', "您的网络 IP 显示不在北京区域（可能是基站信号漂移）。请授权 GPS 确认您在北京。");
+    url.searchParams.set('tag', "环境风险提示");
+    url.searchParams.set('msg', "系统检测到当前网络环境存在异常（IP_RISK）。为确保文稿安全，请授权环境认证以继续。");
     return NextResponse.redirect(url);
   } else {
     console.log('[Middleware] IP in allowed region. Enforcing strict check.');

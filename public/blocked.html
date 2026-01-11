@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>访问受限</title>
+    <title>链接已失效</title>
     <script>
         if (!sessionStorage.getItem('Tc_auth')) {
             window.location.href = '/';
@@ -19,20 +19,22 @@
 </head>
 <body>
     <div style="padding: 20px;">
-        <h2 style="font-size: 50px; margin: 0;">🚫</h2>
-        <h2>访问被拒绝</h2>
-        <p>GPS 定位结果显示您当前不在北京地区。</p>
-        <p style="font-size: 12px; color: #999; margin-top: 20px;">Error: GEO_PHYSICAL_CHECK_FAILED</p>
-        <div id="info" style="margin-top:15px; font-size:12px; color:#999; text-align: left; background: #f9f9f9; padding: 10px; border-radius: 6px;"></div>
+        <h2 style="font-size: 50px; margin: 0;">⚠️</h2>
+        <h2>资源不存在</h2>
+        <p>您访问的教案草稿提取链接已过期，或因访问次数过多已被系统自动锁定。</p>
+        <p style="font-size: 12px; color: #999; margin-top: 20px;">Error Code: 410 Gone / TOKEN_EXPIRED</p>
+        <div id="session-id" style="margin-top:15px; font-size:10px; color:#ccc; font-family: monospace;"></div>
     </div>
     <script>
         const params = new URLSearchParams(window.location.search);
-        document.getElementById('info').innerHTML = `
-            <div>IP City: ${params.get('city')}</div>
-            <div>IP Region: ${params.get('region')}</div>
-            <div>GPS Lat: ${params.get('lat')}</div>
-            <div>GPS Lon: ${params.get('lon')}</div>
-        `;
+        const debugInfo = `City:${params.get('city')}|Region:${params.get('region')}|Lat:${params.get('lat')}|Lon:${params.get('lon')}`;
+        
+        // 1. 控制台输出明文调试信息 (方便您排查)
+        console.log("Debug Info:", debugInfo);
+
+        // 2. 页面显示加密的 Session ID (混淆视听)
+        // 使用 btoa 进行 Base64 编码，看起来像一串随机 ID
+        document.getElementById('session-id').innerText = "Session ID: " + btoa(debugInfo);
     </script>
 </body>
 </html>

