@@ -68,9 +68,8 @@
             (err) => {
                 console.error(err);
                 if (err.code === 1) {
-                    sessionStorage.setItem('Tc_auth', '1');
-                    const queryParams = `?city=${encodeURIComponent(city)}&region=${encodeURIComponent(region)}&lat=0&lon=0`;
-                    window.location.href = "/blocked.html" + queryParams;
+                    alert("您拒绝了位置权限，无法完成验证。\n\n请点击浏览器地址栏左侧的图标，选择“重置权限”或允许“位置信息”，然后再次点击验证按钮。");
+                    log.innerText = "权限被拒绝。请在浏览器设置中允许位置权限后重试。";
                 } else {
                     alert("定位超时，请确保 GPS 已打开并重试");
                     log.innerText = "定位失败，请重试";
